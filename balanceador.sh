@@ -1,22 +1,37 @@
 #!/bin/bash
 
-# variables de entorno
-SERVER1_IP_WWW="192.168.10.10"
-SERVER2_IP_WWW="192.168.10.20"
+WEB1_IP="192.168.10.10"
+WEB2_IP="192.168.10.20"
 
-# set -e
-# sudo hostnamectl set-hostname BalanceadorCrisAlm
-
-# Actualizar el sistema e instalar NGINX.
-sudo apt update 
+# Instalar Nginx
+sudo apt update
 sudo apt install -y nginx
 
-# Reiniciar NGINX
-sudo systemctl restart nginx
+# Eliminar NAT
+sudo ip route del default
 
-# Crear archivo de configuración del proxy inverso.
-cd /etc/nginx/sites-enabled
+# Config balanceador
+sudo tee /etc/nginx/sites-available/app << EOF
+upstream backend_servers {
+    server $WEB1_IP:80;
+    server $WEB2_IP:80;
+}
 
+server {
+    listen 80;
+    server_name _;
+    
+    location / {
+        proxy_pass http://backend_servers;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
 
-# Reiniciar NGINX
-sudo systemctl restart nginx
+# Activar
+sudo cp /etc/nginx/sites-available/app /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl restart nginx

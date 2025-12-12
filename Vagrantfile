@@ -15,43 +15,43 @@ Vagrant.configure("2") do |config|
   config.vm.box = "debian/bookworm64"
 
     config.vm.define "serverDB1" do |serverDB1|
-      serverDB1.vm.hostname = "serverDB1"
+      serverDB1.vm.hostname = "serverDB1Cristina"
       serverDB1.vm.network "private_network", ip: "192.168.30.40", virtualbox__intnet: "red_bd"
-      # serverDB1.vm.provision "shell", path: "server_db.sh"
+      serverDB1.vm.provision "shell", path: "server_db.sh"
     end
 
     config.vm.define "serverDB2" do |serverDB2|
-      serverDB2.vm.hostname = "serverDB2"
+      serverDB2.vm.hostname = "serverDB2Cristina"
       serverDB2.vm.network "private_network", ip: "192.168.30.50", virtualbox__intnet: "red_bd"
-      # serverDB2.vm.provision "shell", path: "server_db.sh"
+      serverDB2.vm.provision "shell", path: "server_db.sh"
     end
 
     config.vm.define "proxyDB" do |proxyDB|
-      proxyDB.vm.hostname = "proxyDB"
+      proxyDB.vm.hostname = "proxyDBCristina"
       proxyDB.vm.network "private_network", ip: "192.168.30.5", virtualbox__intnet: "red_bd"
       proxyDB.vm.network "private_network", ip: "192.168.20.5", virtualbox__intnet: "red_cluster"
-      # proxyDB.vm.provision "shell", path: "proxyDB.sh"
+      proxyDB.vm.provision "shell", path: "proxyDB.sh"
     end
 
     config.vm.define "serverNFS" do |serverNFS|
       serverNFS.vm.hostname = "serverNFS"
       serverNFS.vm.network "private_network", ip: "192.168.10.30", virtualbox__intnet: "red_www"
       serverNFS.vm.network "private_network", ip: "192.168.20.30", virtualbox__intnet: "red_cluster"
-      # serverNFS.vm.provision "shell", path: "server_nfs.sh"
+      serverNFS.vm.provision "shell", path: "server_nfs.sh"
     end
     
     config.vm.define "server1" do |server1|
       server1.vm.hostname = "server1"
       server1.vm.network "private_network", ip: "192.168.10.10", virtualbox__intnet: "red_www"
       server1.vm.network "private_network", ip: "192.168.20.10", virtualbox__intnet: "red_cluster"
-      # server1.vm.provision "shell", path: "server_web.sh"
+      server1.vm.provision "shell", path: "server_web.sh"
     end
 
     config.vm.define "server2" do |server2|
       server2.vm.hostname = "server2"
       server2.vm.network "private_network", ip: "192.168.10.20", virtualbox__intnet: "red_www"
       server2.vm.network "private_network", ip: "192.168.20.20", virtualbox__intnet: "red_cluster"
-      # server2.vm.provision "shell", path: "server_web.sh"
+      server2.vm.provision "shell", path: "server_web.sh"
     end
 
     config.vm.define "balanceador" do |balanceador|
@@ -59,7 +59,7 @@ Vagrant.configure("2") do |config|
       balanceador.vm.network "private_network", ip: "192.168.10.5", virtualbox__intnet: "red_www"
       balanceador.vm.network "forwarded_port", guest: 80, host: 8080
       balanceador.vm.network "forwarded_port", guest: 443, host: 8443
-      # balanceador.vm.provision "shell", path: "balanceador.sh"
+      balanceador.vm.provision "shell", path: "balanceador.sh"
     end
 
   # Disable automatic box update checking. If you disable this, then

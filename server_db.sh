@@ -1,30 +1,41 @@
 #!/bin/bash
 
-# variables de entorno
-DB_NAME="wordpress_db"
-DB_USER="crisalm"
-DB_PASS="pass"
-DB_HOST="192.168.20.%"
+# Variables
+SQL_FILE="/vagrant/db/database.sql"
+CLUSTER_NODES="192.168.30.40,192.168.30.50"
 
-set -e
-sudo hostnamectl set-hostname DBCrisAlm
-
-# Actualizar el sistema e instalar MariaDB.
+# Instalar MariaDB + Galera
 sudo apt update
-sudo apt install -y mariadb-server
+sudo apt install -y mariadb-server rsync
 
-# Configurando MySQL para escuchar en 0.0.0.0.
-sudo sed -i "s/^bind-address.*127.0.0.1/bind-address = 0.0.0.0/g" /etc/mysql/mariadb.conf.d/50-server.cnf
-sudo systemctl restart mariadb
+# Eliminar NAT
+sudo ip route del default
 
-# Creando la BD y usuario.
-sudo mysql -u root <<EOF
-CREATE DATABASE IF NOT EXISTS $DB_NAME CHARSET utf8mb4;
-CREATE USER '$DB_USER'@'$DB_HOST' IDENTIFIED BY '$DB_PASS';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'$DB_HOST' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
+# Config Galera
+sudo tee -a /etc/mysql/mariadb.conf.d/50-server.cnf << EOF
+
+[mysqld]
+bind-address = 0.0.0.0
+default_storage_engine=InnoDB
+binlog_format=ROW
+innodb_autoinc_lock_mode=2
+
+# Galera
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+wsrep_cluster_address="gcomm://$CLUSTER_NODES"
+wsrep_sst_method=rsync
+wsrep_node_name="db1"
+wsrep_node_address="192.168.30.40"
 EOF
-echo "Host: 192.168.20.50 | DB: $DB_NAME | User: $DB_USER | Pass: $DB_PASS"
 
-# # Eliminar la puerta de enlace de la NAT
-# sudo ip route del default
+# Reiniciar (inicia clúster)
+sudo systemctl restart mariadb
+sudo systemctl enable mariadb
+
+# Importar el SQL que lo hace TODO
+if [ -f "$SQL_FILE" ]; then
+    sudo mysql -u root < "$SQL_FILE"
+else
+    echo "Archivo ${SQL_FILE} no encontrado."
+fi
