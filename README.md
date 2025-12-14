@@ -6,24 +6,29 @@ Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores w
 * [1. Arquitectura](#1-arquitectura)
 * [2. Requisitos Previos](#2-requisitos-previos)
 * [3. Configuración del Vagrantfile](#3-configuración-del-vagrantfile)
-  * [3.1. ¿Qué es el Vagrantfile?](#31-qué-es-el-vagrantfile)
-  * [3.2. Configuración](#32-configuración)
-* [4. Script de Aprovisionamiento: Mysql](#4-script-de-aprovisionamiento-mysql)
-  * [4.1. Declaración de Variables](#41-declaración-de-variables)
-  * [4.2. Actualización e Instalación de MariaDB](#42-actualización-e-instalación-de-mariadb)
-  * [4.3. Eliminación de la Puerta de Enlace NAT](#43-eliminación-de-la-puerta-de-enlace-nat)
-  * [4.4. Modificación del `bind-address`](#44-modificación-del-bind-address)
-  * [4.5. Creación de la base de datos](#45-creación-de-la-base-de-datos)
-  * [4.6. Importación del archivo SQL](#46-importación-del-archivo-sql)
-* [5. Script de Aprovisionamiento: Apache](#5-script-de-aprovisionamiento-apache)
-  * [5.1. Declaración de Variables](#51-declaración-de-variables)
-  * [5.2. Actualización e Instalación de Aplicaciones](#52-actualización-e-instalación-de-aplicaciones)
-  * [5.3. Despliegue de Código](#53-despliegue-de-código)
-  * [5.4. Permisos](#54-permisos)
-  * [5.5. Configuración de la Aplicación](#55-configuración-de-la-aplicación)
-  * [5.6. Activación del Módulo `mod_rewrite`](#56-activación-del-módulo-mod_rewrite)
-* [6. Comprobación y Uso](#6-comprobación-y-uso)
-* [7. Conclusión](#7-conclusión)
+  * [3.1. ¿Qué es el Vagrantfile?](#31-qué-es-el-vagrantfile)
+  * [3.2. Configuración](#32-configuración)
+* [4. Script de Aprovisionamiento: MySQL/Galera](#4-script-de-aprovisionamiento-mysqlgalera)
+  * [4.1. Declaración de Variables](#41-declaración-de-variables)
+  * [4.2. Actualización e Instalación de MariaDB y Galera](#42-actualización-e-instalación-de-mariadb-y-galera)
+  * [4.3. Configuración del Archivo Galera](#43-configuración-del-archivo-galera)
+  * [4.4. Creación del Cluster, Usuario y Permisos](#44-creación-del-cluster-usuario-y-permisos)
+  * [4.5. Importación del Archivo SQL](#45-importación-del-archivo-sql)
+* [5. Script de Aprovisionamiento: NFS](#5-script-de-aprovisionamiento-nfs)
+  * [5.1. Actualización e Instalación de NFS](#51-actualización-e-instalación-de-nfs)
+  * [5.2. Creación de la Carpeta Compartida](#52-creación-de-la-carpeta-compartida)
+  * [5.3. Configuración del Config.php](#53-configuración-del-configphp)
+  * [5.4. Configuración de Exportaciones](#54-configuración-de-exportaciones)
+  * [5.5. Configuración del /etc/php/8.2/fpm/pool.d/www.conf](#55-configuración-del-etcphp82fpmpooldwwwconf)
+* [6. Script de Aprovisionamiento: Servidor Web (Nginx + PHP-FPM)](#6-script-de-aprovisionamiento-servidor-web-nginx--php-fpm)
+  * [6.1. Actualización e Instalación de Nginx, PHP-FPM y Cliente NFS](#61-actualización-e-instalación-de-nginx-php-fpm-y-cliente-nfs)
+  * [6.2. Montaje del Directorio Compartido](#62-montaje-del-directorio-compartido)
+  * [6.3. Configuración de Nginx y Activación del Sitio](#63-configuración-de-nginx-y-activación-del-sitio)
+* [7. Script de Aprovisionamiento: Balanceadores (Web y DB)](#7-script-de-aprovisionamiento-balanceadores-web-y-db)
+  * [7.1. Configuración del Balanceador Web](#71-configuración-del-balanceador-web)
+  * [7.2. Configuración del Balanceador de Base de Datos](#72-configuración-del-balanceador-de-base-de-datos)
+* [8. Comprobación y Uso](#8-comprobación-y-uso)
+* [9. Conclusión](#9-conclusión)
 ---
 
 ## 1\. Arquitectura.
@@ -74,7 +79,7 @@ La estructura de carpetas necesaria es la siguiente:
     └── index.php, config.php, etc. (El código de la aplicación)
 ```
 
-A continuación, se explicará cómo configurar el Vagrantfile y los cinco scripts de aprovisionamiento.
+A continuación, se explicará cómo configurar el Vagrantfile y detalles importantes de los cinco scripts de aprovisionamiento.
 
 -----
 
@@ -122,12 +127,12 @@ Se definen variables para almacenar datos importantes que se repetirán en varia
 
 ### 4.2. Actualización e Instalación de MariaDB y Galera.
 
-Siempre se recomienda actualizar el sistema operativo, asegurando que tenga las versiones más recientes y estables del software. Después, se instala MariaDB y Galera. `-y` automatiza el proceso de confirmación.
+Siempre se recomienda actualizar el sistema operativo primero, asegurando que tenga las versiones más recientes y estables del software. `-y` automatiza el proceso de confirmación.
 
 ![mysql install)](images/mysql_install.png)
 
 
-### 4.4. Configuración del Archivo Galera.
+### 4.3. Configuración del Archivo Galera.
 
 Se crea el archivo de configuración para la replicación en ambos nodos.
 
@@ -137,7 +142,7 @@ Se crea el archivo de configuración para la replicación en ambos nodos.
 * `wsrep_sst_auth`: Credenciales.
 * `wsrep_node_address`: IP de la interfaz de replicación del nodo actual.
 
-### 4.5. Creación del Cluster, Usuario y Permisos.
+### 4.4. Creación del Cluster, Usuario y Permisos.
 
 Con `galera_new_cluster` se crea un nuevo cluster. A continuación, se comienza la creación de usuarios.
 
@@ -147,13 +152,13 @@ Con `galera_new_cluster` se crea un nuevo cluster. A continuación, se comienza 
 Es importante no olvidar que las sentencias SQL terminan siempre con `;`.
 
 
-### 4.6. Importación del archivo SQL.
+### 4.5. Importación del Archivo SQL.
 
 Para finalizar, hay que importar el archivo `database.sql` que contiene las sentencias necesarias para la creación de la base de datos y las tablas que usará la aplicación. 
 
 ![mysql importación del .sql)](images/mysql_sqlFile.png)
 
-Este bloque `if` comprueba primero si la ruta es correcta y si el archivo existe. Después, le pasa el fichero a la base de datos (`sudo mysql -u root $DB_NAME < "$SQL_FILE"`). Si falla, mostrará un mensaje de error.
+Este bloque `if` comprueba primero si la ruta es correcta y si el archivo existe. Después, le pasa el fichero a la base de datos (`sudo mysql -u root -p "$PASS" < "$SQL_FILE"`). Si falla, mostrará un mensaje de error.
 
 Con esto, el script de aprovisionamiento de MySQL estaría completo.
 
@@ -164,62 +169,83 @@ Con esto, el script de aprovisionamiento de MySQL estaría completo.
 Este script se encarga de configurar el almacenamiento compartido para el código de la aplicación.
 
 
-### 5.1. Declaración de Variables.
+### 5.1. Actualización e Instalación de NFS.
 
-Se definen variables para almacenar datos importantes que se repetirán en varias partes del script.
+![nfs install)](images/nfs_install.png)
 
-![apache variables)](images/apache_variables.png)
+### 5.2. Creación de la Carpeta Compartida.
 
-Igual que el script anterior, `DB_HOST="$1"` captura la IP del servidor de base de datos, pasada por `args` en el Vagrantfile.
+![nfs files)](images/nfs_files.png)
 
-
-### 5.2. Actualización e Instalación de Aplicaciones.
-
-Se actualiza primero el sistema operativo. A continuación, se instala los componentes clave de la pila LAMP: Apache2 (servidor web), PHP (lenguaje de programación), `libapache2-mod-php` (módulo para que Apache ejecute PHP) y `php-mysql` (el módulo que permite a PHP conectar con MariaDB/MySQL).
-
-![apache install)](images/apache_install.png)
-
-
-### 5.3. Despliegue de Código.
-
-En este caso, para evitar posibles conflictos con los nombres de los archivos, se elimina (`rm -f`) la página web de bienvenida predeterminada de Apache (`index.html`), que se encuentra en `/var/www/html`.
-
-![apache files)](images/apache_files.png)
-
-A continuación, se copia de manera todo el contenido de la carpeta compartida (`/vagrant/src`) al directorio actual (`.`), que es todo el código de la aplicación.
-
-
-### 5.4. Permisos.
+La variable `WEB_ROUTE` guarda la ruta `/var/www/html`.
 
 El directorio `/var/www/html` necesita tener los permisos correctos para que el servidor web pueda leerlo y ejecutarlo. 
 
-Con el comando `chmod -R 755` se asigna los permisos de lectura y escritura a los archivos dentro del directorio; el propietario tendrá el control total, y otros usuarios no podrán modificarlos.
+Con el comando `chmod -R 755` se asigna los permisos de lectura y escritura a los archivos dentro del directorio; el propietario tendrá el control total, y otros usuarios no podrán modificarlos. El usuario Nginx por defecto es `www-data`. El comando `chown -R www-data:www-data` cambia la propiedad de los archivos al usuario y grupo de Nginx.
 
-El usuario Apache por defecto es `www-data`. El comando `chown -R www-data:www-data "$WEB_ROUTE"` cambia la propiedad de los archivos al usuario y grupo de Apache.
+### 5.3. Configuración del Config.php.
 
-![apache permisos)](images/apache_permisos.png)
+Con el comando `sed` se introducen los parámetros necesarios para el `config.php` con relación a la base de datos.
+
+![nfs config)](images/nfs_config.png)
+
+### 5.4. Configuración de Exportaciones.
+
+Se modifica el archivo `/etc/exports` para compartir el directorio `/var/www/html` con los servidores web, especificando sus IPs.
+
+![nfs exports)](images/nfs_exports.png)
 
 
-### 5.5. Configuración de la Aplicación.
+### 5.5. Configuración del /etc/php/8.2/fpm/pool.d/www.conf.
 
-Este bloque `if` comprueba primero si la ruta es correcta y si el archivo `config.php` existe.
+La ruta `/etc/php/8.2/fpm/pool.d/www.conf` está guardada en la variable `PHP_FPM_POOL`.
 
-`sed` se utiliza para buscar (`s/`) y reemplazar (`/g`) el texto deseado directamente en el archivo (`-i`).
-
-![apache config)](images/apache_config.png)
-
-
-### 5.6. Activación del Módulo `mod_rewrite`.
-
-Para que la aplicación funcione correctamente, se requiere activar `mod_rewrite`, un módulo que, por así decirlo, actúa como traductor entre el usuario y la aplicación. Reescribe la URL que el usuario escribe a a la sintaxis interna que el código PHP entiende. Se activa con el comando `a2enmod rewrite`.
-
-![apache habilitar)](images/apache_habilitar.png)
-
-Por último, se reinicia el servicio Apache (`systemctl restart apache2`) para que se apliquen todos los cambios realizados.
+![nfs phpfpm)](images/nfs_phpfpm.png)
+![nfs phpfpm)](images/nfs_phpfpm2.png)
 
 -----
 
-## 6\. Comprobación y Uso.
+## 6\. Script de Aprovisionamiento: Servidor Web.
+
+Este script se encarga de configurar los nodos web.
+
+
+### 6.1. Actualización e Instalación de Nginx, PHP-FPM y Cliente NFS.
+
+![web install)](images/web_install.png)
+
+### 6.2. Montaje del Directorio Compartido.
+
+![web files)](images/web_files.png)
+
+Hay que asegurarse de montarlo en `/etc/fstab` para automatizar el proceso cada vez que se reinicia la máquina.
+
+### 6.3. Configuración de Nginx y Activación del Sitio.
+
+![web config)](images/web_config.png)
+![web ln)](images/web_ln.png)
+
+-----
+
+## 7\. Script de Aprovisionamiento: Balanceadores (Web y DB).
+
+En balanceador de base de datos, se instala HAProxy y Mariadb-client. En el balanceador web, se usa Nginx.
+
+### 7.1. Configuración del Balanceador Web.
+
+Escucha en el puerto 80 y dirige el tráfico a los servidores.
+
+![bal config)](images/bal_config.png)
+
+### 7.2. Configuración del Balanceador de Base de Datos.
+
+Escucha en el puerto 3306 y dirige el tráfico a los nodos Galera.
+
+![proxy config)](images/proxy_config.png)
+![proxy config)](images/proxy_config2.png)
+
+-----
+## 8\. Comprobación y Uso.
 
 Para levantar la arquitectura, simplemente se ejecuta el siguiente comando en el directorio raíz: `vagrant up`.
 
@@ -228,12 +254,8 @@ Una vez que ambas máquinas estén encendidas, para verificar el funcionamiento 
   1. En un navegador web, introducir la URL: `http://localhost:8080`. 
   2. Probar la aplicación. Introducir, visualizar y borrar datos para comprobar su correcto funcionamiento.
 
-[![Ver video](images/comprobacion.png)](https://www.canva.com/design/DAG5m7j1dHA/ujCRUtqkkVI6YOF6tu4RvQ/watch?utm_content=DAG5m7j1dHA&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h0c8ec7e6e0)
+Enlace para ver el vídeo de comprobación: https://www.canva.com/design/DAG5m7j1dHA/ujCRUtqkkVI6YOF6tu4RvQ/watch?utm_content=DAG5m7j1dHA&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h0c8ec7e6e0
 
-(Haz click en la imagen para ver el vídeo)
+## 9\. Conclusión.
 
-## 7\. Conclusión.
-
-El objetivo de este práctica era diseñar y automatizar una arquitectura de dos niveles segura. Se ha logrado mediante el uso de Vagrant, junto con los scripts de aprovisionamiento. 
-
-Como resultado, se ha obtenido una aplicación web perfectamente funcional.
+El objetivo de esta práctica era diseñar y automatizar una arquitectura de cuatro niveles, altamente disponible y segura. Se ha logrado mediante el uso de Vagrant, junto con los scripts de aprovisionamiento, aislando las capas mediante tres subredes y utilizando HAProxy y MariaDB Galera Cluster para garantizar la continuidad del servicio ante fallos.
