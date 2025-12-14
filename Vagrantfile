@@ -34,28 +34,28 @@ Vagrant.configure("2") do |config|
     end
 
     config.vm.define "serverNFS" do |serverNFS|
-      serverNFS.vm.hostname = "serverNFS"
+      serverNFS.vm.hostname = "serverNFSCristina"
       serverNFS.vm.network "private_network", ip: "192.168.10.30", virtualbox__intnet: "red_www"
       serverNFS.vm.network "private_network", ip: "192.168.20.30", virtualbox__intnet: "red_cluster"
       serverNFS.vm.provision "shell", path: "server_nfs.sh"
     end
     
     config.vm.define "server1" do |server1|
-      server1.vm.hostname = "server1"
+      server1.vm.hostname = "server1Cristina"
       server1.vm.network "private_network", ip: "192.168.10.10", virtualbox__intnet: "red_www"
       server1.vm.network "private_network", ip: "192.168.20.10", virtualbox__intnet: "red_cluster"
       server1.vm.provision "shell", path: "server_web.sh"
     end
 
     config.vm.define "server2" do |server2|
-      server2.vm.hostname = "server2"
+      server2.vm.hostname = "server2Cristina"
       server2.vm.network "private_network", ip: "192.168.10.20", virtualbox__intnet: "red_www"
       server2.vm.network "private_network", ip: "192.168.20.20", virtualbox__intnet: "red_cluster"
       server2.vm.provision "shell", path: "server_web.sh"
     end
 
     config.vm.define "balanceador" do |balanceador|
-      balanceador.vm.hostname = "balanceador"
+      balanceador.vm.hostname = "balanceadorCristina"
       balanceador.vm.network "private_network", ip: "192.168.10.5", virtualbox__intnet: "red_www"
       balanceador.vm.network "forwarded_port", guest: 80, host: 8080
       # balanceador.vm.network "forwarded_port", guest: 443, host: 8443

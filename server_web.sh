@@ -3,9 +3,9 @@
 NFS_SERVER="192.168.20.30"
 WEB_ROUTE="/var/www/html"
 
-# Instalar Nginx y NFS client
+# Instalar Nginx, PHP-FPM y NFS client
 sudo apt update
-sudo apt install -y nginx nfs-common
+sudo apt install -y nginx php-fpm nfs-common
 
 # Crear directorio para montaje NFS
 sudo mkdir -p "$WEB_ROUTE"
