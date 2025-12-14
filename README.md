@@ -257,7 +257,7 @@ Una vez que ambas máquinas estén encendidas, para verificar el funcionamiento 
   1. En un navegador web, introducir la URL: `http://localhost:8080`. 
   2. Probar la aplicación. Introducir, visualizar y borrar datos para comprobar su correcto funcionamiento.
 
-Enlace para ver el vídeo de comprobación: https://www.canva.com/design/DAG5m7j1dHA/ujCRUtqkkVI6YOF6tu4RvQ/watch?utm_content=DAG5m7j1dHA&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h0c8ec7e6e0
+Enlace para ver el vídeo de comprobación: https://drive.google.com/file/d/1u9xWlja3ve6r-Ie22FP67GUWao4jP4aN/view?usp=sharing
 
 ## 9\. Conclusión.
 
