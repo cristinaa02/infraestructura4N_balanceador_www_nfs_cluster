@@ -1,4 +1,4 @@
-# Infraestructura de 3 Niveles: Aprovisionamiento con Vagrant
+# Infraestructura de 4 Niveles: Aprovisionamiento con Vagrant
 Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores web, un servidor NFS, un balanceador de base de datos, y un cluster de dos servidores de base de datos.
 
 ## Índice
