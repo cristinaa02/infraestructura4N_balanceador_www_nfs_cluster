@@ -1,14 +1,11 @@
 #!/bin/bash
 
-NFS_SERVER="192.168.10.30"
+NFS_SERVER="192.168.20.30"
 WEB_ROUTE="/var/www/html"
 
 # Instalar Nginx
 sudo apt update
-sudo apt install -y nginx
-
-# Eliminar NAT
-sudo ip route del default
+sudo apt install -y nginx nfs-common
 
 # Montar NFS
 sudo mkdir -p "$WEB_ROUTE"
@@ -36,7 +33,9 @@ server {
 }
 EOF
 
-sudo cp /etc/nginx/sites-available/app /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/app /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
 
+# Eliminar NAT
+sudo ip route del default

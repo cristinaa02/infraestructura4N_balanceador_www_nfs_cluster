@@ -7,11 +7,8 @@ WEB2_IP="192.168.10.20"
 sudo apt update
 sudo apt install -y nginx
 
-# Eliminar NAT
-sudo ip route del default
-
 # Config balanceador
-sudo tee /etc/nginx/sites-available/app << EOF
+sudo tee /etc/nginx/conf.d/load-balancer.conf << EOF
 upstream backend_servers {
     server $WEB1_IP:80;
     server $WEB2_IP:80;
@@ -32,6 +29,6 @@ server {
 EOF
 
 # Activar
-sudo cp /etc/nginx/sites-available/app /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/conf.d/load-balancer.conf /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl restart nginx
