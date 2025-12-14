@@ -92,26 +92,25 @@ La configuración se basa en la imagen `debian/bookworm64` para ambas máquinas 
 
 Con `config.vm.box` se indica la imagen del sistema operativo; en este caso, Debian (Debian 12).
 
-![Vagrantfile box)](images/vagrantfile_box.png)
-
 Para ambas máquinas, es necesario definir los siguientes parámetros que establecen la estructura de la arquitectura:
 
 * `config.vm.define`: Define el nombre que se usará para referirse a la VM en los comandos de Vagrant (por ejemplo: `vagrant up crisalmmysql`).
 * `vm.network "private_network", ip: ...`: Asigna una IP estática en una red privada.
 * `vm.provision "shell"`: Indica la ruta del script (`path`) que se ejecutará automáticamente al arrancar la máquina. Con `args` se le da a conocer la IP de la otra máquina.
 
-![Vagrantfile mysql)](images/vagrantfile_mysql.png)
+![Vagrantfile mvs)](images/vagrantfile_mvs1.png)
+![Vagrantfile mvs)](images/vagrantfile_mvs2.png)
 
-En el caso del servidor web, es imprescindible mapear un puerto para que el usuario acceda a la aplicación. 
+En el caso del balanceador, es imprescindible mapear un puerto para que el usuario acceda a la aplicación. 
 * `vm.network "forwarded_port", guest: 80 , host: 8080`: Reenviar el tráfico del puerto de la máquina física (`host`) al puerto de la VM (`guest`).
 
-![Vagrantfile apache)](images/vagrantfile_apache.png)
+![vagrantfile_balanceador)](images/vagrantfile_balanceador.png)
 
 -----
     
-## 4\. Script de Aprovisionamiento: Mysql.
+## 4\. Script de Aprovisionamiento: MySQL/Galera.
 
-Este script se encarga de instalar y configurar el servidor de base de datos.
+Este script se encarga de instalar y configurar el cluster de base de datos.
 
 
 ### 4.1. Declaración de Variables.
@@ -120,55 +119,37 @@ Se definen variables para almacenar datos importantes que se repetirán en varia
 
 ![mysql variables)](images/mysql_variables.png)
 
-`APACHE_HOST="$1"` captura la IP del servidor web, pasada por `args` en el Vagrantfile.
-`SQL_FILE="/vagrant/db/database.sql"` indica la ruta donde se encuentra el archivo que contiene los datos iniciales de la aplicación. Accede a él desde una **carpeta compartida** vagrant que el programa crea automáticamente.
 
+### 4.2. Actualización e Instalación de MariaDB y Galera.
 
-### 4.2. Actualización e Instalación de MariaDB.
-
-Siempre se recomienda actualizar el sistema operativo, asegurando que tenga las versiones más recientes y estables del software. Después, se instala el sistema gestor de base de datos, en este caso, MariaDB. `-y` automatiza el proceso de confirmación.
+Siempre se recomienda actualizar el sistema operativo, asegurando que tenga las versiones más recientes y estables del software. Después, se instala MariaDB y Galera. `-y` automatiza el proceso de confirmación.
 
 ![mysql install)](images/mysql_install.png)
 
 
-### 4.3. Eliminación de la Puerta de Enlace NAT.
+### 4.4. Configuración del Archivo Galera.
 
-Para que el servidor no tenga salida a Internet, se elimina la puerta de enlace por defecto (el adaptador NAT implícito que usa VirtualBox). 
+Se crea el archivo de configuración para la replicación en ambos nodos.
 
-![mysql gateway eliminado)](images/mysql_deleteIP.png)
+![mysql bind-address)](images/mysql_galera.png)
 
+* `wsrep_cluster_address`: Lista de nodos a buscar para la unión/replicación.
+* `wsrep_sst_auth`: Credenciales.
+* `wsrep_node_address`: IP de la interfaz de replicación del nodo actual.
 
-### 4.4. Modificación del `bind-address`.
+### 4.5. Creación del Cluster, Usuario y Permisos.
 
-Es necesario modificar la configuración del servicio MariaDB para que acepte conexiones desde la red privada, permitiendo que el servidor web acceda a la base de datos. El archivo donde se modifica el `bind-address` es: `/etc/mysql/mariadb.conf.d/50-server.cnf`.
-Por defecto, MySQL solo escucha en la IP del localhost (`127.0.0.1`). Con el comando `sed` se cambia la directiva, para que MariaDB escuche en todas las interfaces de red internas. Se puede poner directamente la IP del servidor web (`192.168.50.11`), que ofrece más seguridad; en cambio, `0.0.0.0` auemnta la escalabilidad y flexibilidad.
+Con `galera_new_cluster` se crea un nuevo cluster. A continuación, se comienza la creación de usuarios.
 
-![mysql bind-address)](images/mysql_escuchar.png)
-
-No hay que olvidar el comando `systemctl restart mariadb` para reiniciar MariaDB para que se apliquen los cambios.
-
-
-### 4.5. Creación de la base de datos.
-
-Con `sudo mysql -u root <<EOF` se abre una sesión de MySQL como usuario `root` y le dice al script que lea todas las siguientes líneas hasta encontrar `EOF`. Esto evita tener que ejecutar los comandos uno por uno en Bash.
-
-![mysql create database)](images/mysql_createDB.png)
-
-Las sentencias SQL son las siguientes:
-
-* `CREATE DATABASE IF NOT EXISTS $DB_NAME`: Crea la base de datos. Con el parámetro `CHARSET utf8mb4` se asegura la compatibilidad con caracteres modernos.
-* `CREATE USER '$DB_USER'@'$APACHE_HOST' IDENTIFIED BY '$DB_PASS'`: Crea el usuario `user`, le indica que la conexión será con la IP del servidor web y con la contraseña `pass`.
-* `GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'$APACHE_HOST'`: Otorga todos los permisos al usuario creado.
-* `FLUSH PRIVILEGES`: Orden para aplicar los permisos otorgados.
-
-Con el comando `echo` se le dice que muestre los mensajes de confirmación deseados. 
+![mysql create database)](images/mysql_db1.png)
+![mysql create database)](images/mysql_db2.png)
 
 Es importante no olvidar que las sentencias SQL terminan siempre con `;`.
 
 
 ### 4.6. Importación del archivo SQL.
 
-Para finalizar, hay que importar el archivo `database.sql` que contiene las sentencias necesarias para la creación de las tablas que usará la aplicación. 
+Para finalizar, hay que importar el archivo `database.sql` que contiene las sentencias necesarias para la creación de la base de datos y las tablas que usará la aplicación. 
 
 ![mysql importación del .sql)](images/mysql_sqlFile.png)
 
@@ -178,9 +159,9 @@ Con esto, el script de aprovisionamiento de MySQL estaría completo.
 
 -----
 
-## 5\. Script de Aprovisionamiento: Apache.
+## 5\. Script de Aprovisionamiento: NFS.
 
-Este script se encarga de instalar y configurar el servidor web.
+Este script se encarga de configurar el almacenamiento compartido para el código de la aplicación.
 
 
 ### 5.1. Declaración de Variables.
