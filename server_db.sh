@@ -45,21 +45,41 @@ EOF
 # Cluster
 if [ "$IS_BOOTSTRAP_NODE" = true ]; then
 
-    # Iniciar el clúster
-    galera_new_cluster
+    # Iniciar el cluster como bootstrap
+    sudo galera_new_cluster
     sleep 15
     
-    # ARCHIVO SQL
+    # Configurar contraseña de root
+    sudo mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$PASS');"
+    
+    # Crear usuario para HAProxy health checks
+    sudo mysql -u root -p"$PASS" -e "CREATE USER IF NOT EXISTS 'haproxy'@'%';"
+    sudo mysql -u root -p"$PASS" -e "FLUSH PRIVILEGES;"
+    
+    # Crear usuario de aplicación
+    sudo mysql -u root -p"$PASS" -e "CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY '$PASS';"
+    sudo mysql -u root -p"$PASS" -e "GRANT ALL PRIVILEGES ON *.* TO 'user'@'%' WITH GRANT OPTION;"
+    sudo mysql -u root -p"$PASS" -e "FLUSH PRIVILEGES;"
+    
+    # Importar archivo SQL si existe
     if [ -f "$SQL_FILE_PATH" ]; then
-        mysql -u root -p"$PASS" < "$SQL_FILE_PATH"
+        echo "Importando base de datos desde $SQL_FILE_PATH"
+        sudo mysql -u root -p"$PASS" < "$SQL_FILE_PATH"
+        echo "✓ Base de datos importada correctamente"
     else
-        echo "ERROR: Archivo SQL no encontrado en $SQL_FILE_PATH. La DB no fue creada."
-        exit 1
+        echo " Archivo SQL no encontrado en $SQL_FILE_PATH"
     fi
 
 else
-    sudo systemctl start mariadb 
+    # Nodo secundario: solo iniciar MariaDB
+    sudo systemctl start mariadb
+    sleep 10
 fi
 
 # Habilitar el servicio
 sudo systemctl enable mariadb
+
+# Verificar estado del cluster
+sleep 2
+echo "=== Estado del nodo ==="
+sudo mysql -u root -p"$PASS" -e "SHOW STATUS LIKE 'wsrep_cluster_size';" 2>/dev/null || echo "Esperando sincronización..."

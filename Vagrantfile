@@ -58,7 +58,7 @@ Vagrant.configure("2") do |config|
       balanceador.vm.hostname = "balanceador"
       balanceador.vm.network "private_network", ip: "192.168.10.5", virtualbox__intnet: "red_www"
       balanceador.vm.network "forwarded_port", guest: 80, host: 8080
-      balanceador.vm.network "forwarded_port", guest: 443, host: 8443
+      # balanceador.vm.network "forwarded_port", guest: 443, host: 8443
       balanceador.vm.provision "shell", path: "balanceador.sh"
     end
 

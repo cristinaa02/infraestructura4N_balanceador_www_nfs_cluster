@@ -12,14 +12,14 @@ CREATE TABLE users (
   email VARCHAR(100) UNIQUE NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Usuario de la aplicación
-DROP USER IF EXISTS 'user'@'%';
-CREATE USER 'user'@'%' IDENTIFIED BY 'pass';
-GRANT ALL PRIVILEGES ON lamp_db.* TO 'user'@'%';
+-- -- Usuario de la aplicación
+-- DROP USER IF EXISTS 'user'@'%';
+-- CREATE USER 'user'@'%' IDENTIFIED BY 'pass';
+-- GRANT ALL PRIVILEGES ON lamp_db.* TO 'user'@'%';
 
--- Usuario para HAProxy (health checks)
-DROP USER IF EXISTS 'haproxy'@'%';
-CREATE USER 'haproxy'@'%' IDENTIFIED BY 'pass';
-GRANT PROCESS ON *.* TO 'haproxy'@'%';
+-- -- Usuario para HAProxy (health checks)
+-- DROP USER IF EXISTS 'haproxy'@'%';
+-- CREATE USER 'haproxy'@'%' IDENTIFIED BY 'pass';
+-- GRANT PROCESS ON *.* TO 'haproxy'@'%';
 
 FLUSH PRIVILEGES;

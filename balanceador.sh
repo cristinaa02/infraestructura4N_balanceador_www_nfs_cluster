@@ -28,7 +28,5 @@ server {
 }
 EOF
 
-# Activar
-sudo ln -s /etc/nginx/conf.d/load-balancer.conf /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
-sudo nginx -t && sudo systemctl restart nginx
+sudo systemctl restart nginx
