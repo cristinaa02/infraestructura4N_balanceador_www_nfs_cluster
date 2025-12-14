@@ -1,6 +1,8 @@
 # Infraestructura de 4 Niveles: Aprovisionamiento con Vagrant
 Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores web, un servidor NFS, un balanceador de base de datos, y un cluster de dos servidores de base de datos.
 
+-----
+
 ## Índice
 
 * [1. Arquitectura](#1-arquitectura)
@@ -8,13 +10,13 @@ Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores w
 * [3. Configuración del Vagrantfile](#3-configuración-del-vagrantfile)
   * [3.1. ¿Qué es el Vagrantfile?](#31-qué-es-el-vagrantfile)
   * [3.2. Configuración](#32-configuración)
-* [4. Script de Aprovisionamiento: MySQL/Galera](#4-script-de-aprovisionamiento-mysqlgalera)
+* [4. Script de Aprovisionamiento: MariaDB Galera Cluster](#4-script-de-aprovisionamiento-mariadb-galera-cluster)
   * [4.1. Declaración de Variables](#41-declaración-de-variables)
   * [4.2. Actualización e Instalación de MariaDB y Galera](#42-actualización-e-instalación-de-mariadb-y-galera)
   * [4.3. Configuración del Archivo Galera](#43-configuración-del-archivo-galera)
   * [4.4. Creación del Cluster, Usuario y Permisos](#44-creación-del-cluster-usuario-y-permisos)
   * [4.5. Importación del Archivo SQL](#45-importación-del-archivo-sql)
-* [5. Script de Aprovisionamiento: NFS](#5-script-de-aprovisionamiento-nfs)
+* [5. Script de Aprovisionamiento: Servidor NFS](#5-script-de-aprovisionamiento-servidor-nfs)
   * [5.1. Actualización e Instalación de NFS](#51-actualización-e-instalación-de-nfs)
   * [5.2. Creación de la Carpeta Compartida](#52-creación-de-la-carpeta-compartida)
   * [5.3. Configuración del Config.php](#53-configuración-del-configphp)
@@ -29,6 +31,7 @@ Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores w
   * [7.2. Configuración del Balanceador de Base de Datos](#72-configuración-del-balanceador-de-base-de-datos)
 * [8. Comprobación y Uso](#8-comprobación-y-uso)
 * [9. Conclusión](#9-conclusión)
+
 ---
 
 ## 1\. Arquitectura.
