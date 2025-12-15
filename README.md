@@ -8,7 +8,7 @@ Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores w
 * [1. Arquitectura](#1-arquitectura)
 * [2. Requisitos Previos](#2-requisitos-previos)
 * [3. Configuración del Vagrantfile](#3-configuración-del-vagrantfile)
-  - [3.1. ¿Qué es el Vagrantfile?](#31-qué-es-el-vagrantfile)
+ * [3.1. ¿Qué es el Vagrantfile?](#31-qué-es-el-vagrantfile)
   * [3.2. Configuración](#32-configuración)
 * [4. Script de Aprovisionamiento: MariaDB Galera Cluster](#4-script-de-aprovisionamiento-mariadb-galera-cluster)
   * [4.1. Declaración de Variables](#41-declaración-de-variables)
