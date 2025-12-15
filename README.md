@@ -259,6 +259,8 @@ Una vez que ambas máquinas estén encendidas, para verificar el funcionamiento 
 
 Enlace para ver el vídeo de comprobación: https://drive.google.com/file/d/1u9xWlja3ve6r-Ie22FP67GUWao4jP4aN/view?usp=sharing
 
+Para que se puedan ver los logs en los servidores web, hay que activarlo en la configuración de `/etc/nginx/nginx.conf`.
+
 ## 9\. Conclusión.
 
 El objetivo de esta práctica era diseñar y automatizar una arquitectura de cuatro niveles, altamente disponible y segura. Se ha logrado mediante el uso de Vagrant, junto con los scripts de aprovisionamiento, aislando las capas mediante tres subredes y utilizando HAProxy y MariaDB Galera Cluster para garantizar la continuidad del servicio ante fallos.
