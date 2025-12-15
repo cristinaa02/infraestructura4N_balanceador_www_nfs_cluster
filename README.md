@@ -9,26 +9,26 @@ Infraestructura en 4 niveles: un balanceador web, un cluster de dos servidores w
 * [2. Requisitos Previos](#2-requisitos-previos)
 * [3. Configuración del Vagrantfile](#3-configuración-del-vagrantfile)
   * [3.1. ¿Qué es el Vagrantfile?](#31-qué-es-el-vagrantfile)
-  * [3.2. Configuración](#32-configuración)
+  * [3.2. Configuración](#32-configuración)
 * [4. Script de Aprovisionamiento: MariaDB Galera Cluster](#4-script-de-aprovisionamiento-mariadb-galera-cluster)
-  * [4.1. Declaración de Variables](#41-declaración-de-variables)
-  * [4.2. Actualización e Instalación de MariaDB y Galera](#42-actualización-e-instalación-de-mariadb-y-galera)
-  * [4.3. Configuración del Archivo Galera](#43-configuración-del-archivo-galera)
-  * [4.4. Creación del Cluster, Usuario y Permisos](#44-creación-del-cluster-usuario-y-permisos)
-  * [4.5. Importación del Archivo SQL](#45-importación-del-archivo-sql)
+  * [4.1. Declaración de Variables](#41-declaración-de-variables)
+  * [4.2. Actualización e Instalación de MariaDB y Galera](#42-actualización-e-instalación-de-mariadb-y-galera)
+  * [4.3. Configuración del Archivo Galera](#43-configuración-del-archivo-galera)
+  * [4.4. Creación del Cluster, Usuario y Permisos](#44-creación-del-cluster-usuario-y-permisos)
+  * [4.5. Importación del Archivo SQL](#45-importación-del-archivo-sql)
 * [5. Script de Aprovisionamiento: Servidor NFS](#5-script-de-aprovisionamiento-servidor-nfs)
-  * [5.1. Actualización e Instalación de NFS](#51-actualización-e-instalación-de-nfs)
-  * [5.2. Creación de la Carpeta Compartida](#52-creación-de-la-carpeta-compartida)
-  * [5.3. Configuración del Config.php](#53-configuración-del-configphp)
-  * [5.4. Configuración de Exportaciones](#54-configuración-de-exportaciones)
-  * [5.5. Configuración del /etc/php/8.2/fpm/pool.d/www.conf](#55-configuración-del-etcphp82fpmpooldwwwconf)
+  * [5.1. Actualización e Instalación de NFS](#51-actualización-e-instalación-de-nfs)
+  * [5.2. Creación de la Carpeta Compartida](#52-creación-de-la-carpeta-compartida)
+  * [5.3. Configuración del Config.php](#53-configuración-del-configphp)
+  * [5.4. Configuración de Exportaciones](#54-configuración-de-exportaciones)
+  * [5.5. Configuración del /etc/php/8.2/fpm/pool.d/www.conf](#55-configuración-del-etcphp82fpmpooldwwwconf)
 * [6. Script de Aprovisionamiento: Servidor Web (Nginx + PHP-FPM)](#6-script-de-aprovisionamiento-servidor-web-nginx--php-fpm)
-  * [6.1. Actualización e Instalación de Nginx, PHP-FPM y Cliente NFS](#61-actualización-e-instalación-de-nginx-php-fpm-y-cliente-nfs)
-  * [6.2. Montaje del Directorio Compartido](#62-montaje-del-directorio-compartido)
-  * [6.3. Configuración de Nginx y Activación del Sitio](#63-configuración-de-nginx-y-activación-del-sitio)
+  * [6.1. Actualización e Instalación de Nginx, PHP-FPM y Cliente NFS](#61-actualización-e-instalación-de-nginx-php-fpm-y-cliente-nfs)
+  * [6.2. Montaje del Directorio Compartido](#62-montaje-del-directorio-compartido)
+  * [6.3. Configuración de Nginx y Activación del Sitio](#63-configuración-de-nginx-y-activación-del-sitio)
 * [7. Script de Aprovisionamiento: Balanceadores (Web y DB)](#7-script-de-aprovisionamiento-balanceadores-web-y-db)
-  * [7.1. Configuración del Balanceador Web](#71-configuración-del-balanceador-web)
-  * [7.2. Configuración del Balanceador de Base de Datos](#72-configuración-del-balanceador-de-base-de-datos)
+  * [7.1. Configuración del Balanceador Web](#71-configuración-del-balanceador-web)
+  * [7.2. Configuración del Balanceador de Base de Datos](#72-configuración-del-balanceador-de-base-de-datos)
 * [8. Comprobación y Uso](#8-comprobación-y-uso)
 * [9. Conclusión](#9-conclusión)
 
@@ -116,7 +116,7 @@ En el caso del balanceador, es imprescindible mapear un puerto para que el usuar
 
 -----
     
-## 4\. Script de Aprovisionamiento: MySQL/Galera.
+## 4\. Script de Aprovisionamiento: MariaDB Galera Cluster.
 
 Este script se encarga de instalar y configurar el cluster de base de datos.
 
