@@ -257,7 +257,7 @@ Una vez que ambas máquinas estén encendidas, para verificar el funcionamiento 
   1. En un navegador web, introducir la URL: `http://localhost:8080`. 
   2. Probar la aplicación. Introducir, visualizar y borrar datos para comprobar su correcto funcionamiento.
 
-Enlace para ver el vídeo de comprobación: https://drive.google.com/file/d/1u9xWlja3ve6r-Ie22FP67GUWao4jP4aN/view?usp=sharing
+Enlace para ver el vídeo de comprobación: https://drive.google.com/file/d/1nB0XaLUVTqgf6-2d78MwdhnsQLuT-6b4/view?usp=sharing
 
 Para que se puedan ver los logs en los servidores web, hay que activarlo en la configuración de `/etc/nginx/nginx.conf`.
 
